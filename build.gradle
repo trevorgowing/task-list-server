@@ -1,0 +1,93 @@
+import java.time.LocalDate
+import java.time.LocalTime
+
+plugins {
+  id "idea"
+  id "java"
+  id "jacoco"
+  id "application"
+  id "net.ltgt.apt" version "0.18"
+  id "org.flywaydb.flyway" version "5.1.4"
+  id "com.diffplug.gradle.spotless" version "3.14.0"
+  id "org.springframework.boot" version "2.0.4.RELEASE"
+  id "io.spring.dependency-management" version "1.0.6.RELEASE"
+}
+
+version = "0.0.1"
+group = "com.trevorgowing"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+archivesBaseName = "task-list-server"
+mainClassName = "com.trevorgowing.tasklist.Application"
+
+spotless {
+  java {
+    googleJavaFormat()
+  }
+}
+
+flyway {
+  baselineVersion = "2018.08.24.07.15.33.897"
+  outOfOrder = true
+}
+
+jacocoTestReport {
+  reports {
+    xml.enabled = true
+    html.enabled = false
+  }
+}
+
+test {
+  testLogging {
+    events "failed"
+    exceptionFormat "full"
+  }
+}
+
+task resolveDependencies {
+  description = "Download and cache dependencies"
+  doLast {
+    configurations.compileOnly.resolve()
+    configurations.runtime.resolve()
+  }
+}
+
+task createSqlMigration {
+  description = "Create a flyway sql migration in the default location, with a version of timestamp now and default description."
+  doLast {
+    String version = LocalDate.now().toString().replace('-', '.').concat('.')
+        .concat(LocalTime.now().toString().replace(':', '.'))
+    String fileName = 'V'.concat(version).concat('__').concat("description").concat(".sql")
+    String filePath = "src/main/resources/db/migration/".concat(fileName)
+    new File(filePath).createNewFile() ? println(filePath.concat(" migration created successfully"))
+        : println("Failed to create migration ".concat(filePath))
+
+  }
+}
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compileOnly "org.projectlombok:lombok:1.18.2"
+  annotationProcessor "org.projectlombok:lombok:1.18.2"
+
+  compile "org.flywaydb:flyway-core:5.1.4"
+  compile "org.postgresql:postgresql:42.2.4"
+
+  compile "org.springframework.boot:spring-boot-starter-web"
+  compile "org.springframework.boot:spring-boot-starter-json"
+  compile "org.springframework.boot:spring-boot-starter-data-jpa"
+  compile "org.springframework.boot:spring-boot-starter-actuator"
+
+  testCompileOnly "org.projectlombok:lombok:1.18.2"
+  testAnnotationProcessor "org.projectlombok:lombok:1.18.2"
+
+  testCompile "io.rest-assured:rest-assured:3.1.1"
+  testCompile "io.rest-assured:spring-mock-mvc:3.1.1"
+  testCompile "org.springframework.boot:spring-boot-starter-test"
+
+  testRuntime "com.h2database:h2:1.4.197"
+}
