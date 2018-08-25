@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.trevorgowing.tasklist.common.exception.ExceptionResponse;
@@ -212,5 +213,39 @@ public class UserApiTests extends AbstractSpringWebContextTests {
         .contentType(JSON)
         .statusCode(OK.value())
         .body(is(equalTo(JsonEncoder.encodeToString(responseUserDTO))));
+  }
+
+  @Test
+  public void
+      testDeleteByIdWithNoMatchingUser_shouldResponseWithStatusNotFoundAndExceptionResponse() {
+    User userOne = User.builder().username("one").firstName("one").lastName("one").build();
+    entityManager.persist(userOne);
+
+    ExceptionResponse notFoundResponse =
+        ExceptionResponse.builder().status(NOT_FOUND).message("User not found for id: 2").build();
+
+    given()
+        .accept(JSON)
+        .delete("/api/user/2")
+        .then()
+        .log()
+        .ifValidationFails()
+        .contentType(JSON)
+        .statusCode(NOT_FOUND.value())
+        .body(is(equalTo(JsonEncoder.encodeToString(notFoundResponse))));
+  }
+
+  @Test
+  public void testDeleteByIdWithMatchingUser_shouldRespondWithStatusNoContent() {
+    User userOne = User.builder().username("one").firstName("one").lastName("one").build();
+    entityManager.persist(userOne);
+
+    given()
+        .accept(JSON)
+        .delete("/api/user/" + userOne.getId())
+        .then()
+        .log()
+        .ifValidationFails()
+        .statusCode(NO_CONTENT.value());
   }
 }

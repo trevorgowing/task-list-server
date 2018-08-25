@@ -3,6 +3,7 @@ package com.trevorgowing.tasklist.user;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
@@ -16,6 +17,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +36,7 @@ class UserController {
   private final UserFinder userFinder;
   private final UserCreator userCreator;
   private final UserModifier userModifier;
+  private final UserDeleter userDeleter;
 
   @ResponseStatus(OK)
   @SuppressWarnings("unused")
@@ -73,6 +76,13 @@ class UserController {
       throw BadRequestException.causedBy(
           "Path variable User#id is not equal to request body User#id");
     }
+  }
+
+  @ResponseStatus(NO_CONTENT)
+  @SuppressWarnings("unused")
+  @DeleteMapping(path = "/{id}")
+  void delete(@PathVariable Long id) {
+    userDeleter.deleteById(id);
   }
 
   @SuppressWarnings("unused")
