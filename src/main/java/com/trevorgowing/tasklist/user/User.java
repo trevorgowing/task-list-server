@@ -51,6 +51,12 @@ class User extends AbstractAuditable<User, Long> implements Serializable {
         userDTO.getId(), userDTO.getUsername(), userDTO.getFirstName(), userDTO.getLastName());
   }
 
+  void replace(UserDTO userDTO) {
+    this.username = userDTO.getUsername();
+    this.firstName = userDTO.getFirstName();
+    this.lastName = userDTO.getLastName();
+  }
+
   @Override
   public String toString() {
     final StringBuilder toStringBuilder = new StringBuilder(getClass().getSimpleName());

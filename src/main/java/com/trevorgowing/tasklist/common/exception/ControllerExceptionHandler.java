@@ -20,6 +20,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ExceptionResponse> handleBadRequestException(BadRequestException bre) {
+    log.debug(bre.getMessage(), bre);
+
+    return ResponseEntity.status(BAD_REQUEST)
+        .contentType(APPLICATION_JSON_UTF8)
+        .body(ExceptionResponse.from(BAD_REQUEST, bre.getMessage()));
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ExceptionResponse> handleUnhandledException(Exception exception) {
     log.error(exception.getMessage(), exception);

@@ -148,4 +148,69 @@ public class UserApiTests extends AbstractSpringWebContextTests {
         .statusCode(CREATED.value())
         .body(is(equalTo(JsonEncoder.encodeToString(responseUserDTO))));
   }
+
+  @Test
+  public void testPutWithNoMatchingUser_shouldRespondWithStatusNotFoundAndExceptionResponse() {
+    String username = "test";
+    UserDTO requestUserDTO =
+        UserDTO.builder().id(1L).username(username).firstName("fred").lastName("george").build();
+
+    ExceptionResponse notFoundResponse =
+        ExceptionResponse.builder()
+            .status(NOT_FOUND)
+            .message("User not found for id: \'1\'")
+            .build();
+
+    given()
+        .accept(JSON)
+        .contentType(JSON)
+        .body(JsonEncoder.encodeToString(requestUserDTO))
+        .put("/api/user/1")
+        .then()
+        .log()
+        .ifValidationFails()
+        .contentType(JSON)
+        .statusCode(NOT_FOUND.value())
+        .body(is(equalTo(JsonEncoder.encodeToString(notFoundResponse))));
+  }
+
+  @Test
+  public void testPutWithValidUser_shouldRespondWithStatusOkAndUser() {
+    User existingUser = User.builder().username("other").firstName("bob").lastName("lee").build();
+    entityManager.persist(existingUser);
+
+    String username = "test";
+    UserDTO requestUserDTO =
+        UserDTO.builder()
+            .id(existingUser.getId())
+            .username(username)
+            .firstName("fred")
+            .lastName("george")
+            .build();
+
+    MockMvcResponse response =
+        given()
+            .accept(JSON)
+            .contentType(JSON)
+            .body(JsonEncoder.encodeToString(requestUserDTO))
+            .put("/api/user/" + existingUser.getId());
+
+    User user = testUserFinder.findByUsername(username);
+
+    UserDTO responseUserDTO =
+        UserDTO.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .build();
+
+    response
+        .then()
+        .log()
+        .ifValidationFails()
+        .contentType(JSON)
+        .statusCode(OK.value())
+        .body(is(equalTo(JsonEncoder.encodeToString(responseUserDTO))));
+  }
 }

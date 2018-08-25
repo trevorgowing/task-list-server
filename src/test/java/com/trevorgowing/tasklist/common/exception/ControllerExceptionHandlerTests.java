@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
@@ -28,6 +29,25 @@ public class ControllerExceptionHandlerTests extends AbstractTests {
   @Mock private WebRequest webRequest;
 
   @InjectMocks private ControllerExceptionHandler exceptionHandler;
+
+  @Test
+  public void
+      testHandleBadRequestException_shouldReturnResponseEntityContainingExceptionResponse() {
+    BadRequestException exception = BadRequestException.builder().message("message").build();
+
+    ExceptionResponse exceptionResponse =
+        ExceptionResponse.builder().status(BAD_REQUEST).message(exception.getMessage()).build();
+
+    ResponseEntity<ExceptionResponse> expected =
+        ResponseEntity.status(BAD_REQUEST)
+            .contentType(APPLICATION_JSON_UTF8)
+            .body(exceptionResponse);
+
+    ResponseEntity<ExceptionResponse> actual =
+        exceptionHandler.handleBadRequestException(exception);
+
+    assertThat(actual, is(equalTo(expected)));
+  }
 
   @Test
   public void testHandleUnhandledException_shouldReturnResponseEntityContainingExceptionResponse() {
