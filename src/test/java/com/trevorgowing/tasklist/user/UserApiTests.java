@@ -4,22 +4,27 @@ import static io.restassured.http.ContentType.JSON;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.trevorgowing.tasklist.common.exception.ExceptionResponse;
 import com.trevorgowing.tasklist.test.encoder.JsonEncoder;
 import com.trevorgowing.tasklist.test.type.AbstractSpringWebContextTests;
+import io.restassured.module.mockmvc.response.MockMvcResponse;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import javax.persistence.EntityManager;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
+@Import({TestUserFinder.class})
 public class UserApiTests extends AbstractSpringWebContextTests {
 
   @Autowired private EntityManager entityManager;
+  @Autowired private TestUserFinder testUserFinder;
 
   @Test
   public void testGetWithNoExistingUsers_shouldRespondWithStatusOkAndEmptyArray() {
@@ -109,5 +114,38 @@ public class UserApiTests extends AbstractSpringWebContextTests {
         .contentType(JSON)
         .statusCode(OK.value())
         .body(is(equalTo(JsonEncoder.encodeToString(userOneDTO))));
+  }
+
+  @Test
+  public void testPostWithValidUser_shouldRespondWithStatusCreatedAndUser() {
+    String username = "username";
+
+    UserDTO requestUser =
+        UserDTO.builder().username(username).firstName("firstName").lastName("lastName").build();
+
+    MockMvcResponse response =
+        given()
+            .accept(JSON)
+            .contentType(JSON)
+            .body(JsonEncoder.encodeToString(requestUser))
+            .post("/api/user");
+
+    User user = testUserFinder.findByUsername(username);
+
+    UserDTO responseUserDTO =
+        UserDTO.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .build();
+
+    response
+        .then()
+        .log()
+        .ifValidationFails()
+        .contentType(JSON)
+        .statusCode(CREATED.value())
+        .body(is(equalTo(JsonEncoder.encodeToString(responseUserDTO))));
   }
 }

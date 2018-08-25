@@ -3,6 +3,7 @@ package com.trevorgowing.tasklist.user;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
@@ -30,6 +31,25 @@ public class UserControllerExceptionHandlerTests extends AbstractTests {
         UserNotFoundException.builder().message(message).build();
 
     ResponseEntity actual = userController.handleUserNotFoundException(userNotFoundException);
+
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void
+      testHandleDuplicateUsernameException_shouldReturnResponseEntityContainingExceptionResponse() {
+    String message = "User with username: \'test\' already exists";
+
+    ResponseEntity expected =
+        ResponseEntity.status(CONFLICT)
+            .contentType(APPLICATION_JSON_UTF8)
+            .body(ExceptionResponse.builder().status(CONFLICT).message(message).build());
+
+    DuplicateUsernameException duplicateUsernameException =
+        DuplicateUsernameException.builder().message(message).build();
+
+    ResponseEntity actual =
+        userController.handleDuplicateUsernameException(duplicateUsernameException);
 
     assertThat(actual, is(equalTo(expected)));
   }

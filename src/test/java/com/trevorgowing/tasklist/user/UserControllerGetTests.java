@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-public class UserControllerTests extends AbstractControllerTests {
+public class UserControllerGetTests extends AbstractControllerTests {
 
   @Mock private UserFinder userFinder;
 

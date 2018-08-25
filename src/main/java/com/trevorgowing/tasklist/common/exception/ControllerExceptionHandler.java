@@ -1,12 +1,16 @@
 package com.trevorgowing.tasklist.common.exception;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -22,6 +26,28 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity.status(INTERNAL_SERVER_ERROR)
         .contentType(APPLICATION_JSON_UTF8)
         .body(ExceptionResponse.from(INTERNAL_SERVER_ERROR, exception.getMessage()));
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException manve,
+      HttpHeaders headers,
+      HttpStatus status,
+      WebRequest request) {
+    log.debug(manve.getMessage(), manve);
+
+    String message =
+        manve
+            .getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.joining(", "));
+
+    return ResponseEntity.status(BAD_REQUEST)
+        .contentType(APPLICATION_JSON_UTF8)
+        .headers(headers)
+        .body(ExceptionResponse.from(BAD_REQUEST, message));
   }
 
   @Override
