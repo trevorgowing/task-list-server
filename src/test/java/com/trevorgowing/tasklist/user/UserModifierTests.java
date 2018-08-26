@@ -18,31 +18,35 @@ public class UserModifierTests extends AbstractTests {
   @InjectMocks private UserModifier userModifier;
 
   @Test(expected = UserNotFoundException.class)
-  public void testReplaceWithNoMatchingUser_shouldThrow() {
+  public void testModifyWithNoMatchingUser_shouldThrow() {
+    Long id = 1L;
+
     UserDTO userDTO =
-        UserDTO.builder().id(1L).username("test").firstName("fred").lastName("george").build();
+        UserDTO.builder().username("test").firstName("fred").lastName("george").build();
 
-    when(userRepository.findById(1L)).thenReturn(Optional.empty());
+    when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-    userModifier.replace(userDTO);
+    userModifier.modify(id, userDTO);
   }
 
   @Test
   public void
-      testReplaceWithMatchingUser_shouldReplaceValuesAndDelegateToUserRepositoryAndReturnUser() {
+      testModifyWithMatchingUser_shouldReplaceValuesAndDelegateToUserRepositoryAndReturnUser() {
+    Long id = 1L;
+
     UserDTO userDTO =
-        UserDTO.builder().id(1L).username("test").firstName("fred").lastName("george").build();
+        UserDTO.builder().username("test").firstName("fred").lastName("george").build();
 
     User existingUser =
-        User.builder().id(1L).username("other").firstName("bob").lastName("lee").build();
+        User.builder().id(id).username("other").firstName("bob").lastName("lee").build();
 
     User expected =
-        User.builder().id(1L).username("test").firstName("fred").lastName("george").build();
+        User.builder().id(id).username("test").firstName("fred").lastName("george").build();
 
-    when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+    when(userRepository.findById(id)).thenReturn(Optional.of(existingUser));
     when(userRepository.save(argThat(hasSameStateAsUser(expected)))).thenReturn(expected);
 
-    User actual = userModifier.replace(userDTO);
+    User actual = userModifier.modify(id, userDTO);
 
     assertThat(actual, hasSameStateAsUser(expected));
   }

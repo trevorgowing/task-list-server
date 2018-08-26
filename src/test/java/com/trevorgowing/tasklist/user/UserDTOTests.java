@@ -31,18 +31,16 @@ public class UserDTOTests extends AbstractTests {
 
   @Test
   public void testToString_shouldIncludeAllFields() {
-    Long id = 1L;
     String username = "test";
     String firstName = "fred";
     String lastName = "george";
 
     UserDTO userDTO =
-        UserDTO.builder().id(id).username(username).firstName(firstName).lastName(lastName).build();
+        UserDTO.builder().username(username).firstName(firstName).lastName(lastName).build();
 
     assertThat(
         userDTO.toString(),
         hasToString(
-            containsStrings(
-                "id", "1", "username", "test", "firstName", "fred", "lastName", "george")));
+            containsStrings("username", "test", "firstName", "fred", "lastName", "george")));
   }
 }

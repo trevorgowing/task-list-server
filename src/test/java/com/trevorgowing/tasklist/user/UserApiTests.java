@@ -154,7 +154,7 @@ public class UserApiTests extends AbstractSpringWebContextTests {
   public void testPutWithNoMatchingUser_shouldRespondWithStatusNotFoundAndExceptionResponse() {
     String username = "test";
     UserDTO requestUserDTO =
-        UserDTO.builder().id(1L).username(username).firstName("fred").lastName("george").build();
+        UserDTO.builder().username(username).firstName("fred").lastName("george").build();
 
     ExceptionResponse notFoundResponse =
         ExceptionResponse.builder()
@@ -182,12 +182,7 @@ public class UserApiTests extends AbstractSpringWebContextTests {
 
     String username = "test";
     UserDTO requestUserDTO =
-        UserDTO.builder()
-            .id(existingUser.getId())
-            .username(username)
-            .firstName("fred")
-            .lastName("george")
-            .build();
+        UserDTO.builder().username(username).firstName("fred").lastName("george").build();
 
     MockMvcResponse response =
         given()

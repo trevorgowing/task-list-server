@@ -10,16 +10,16 @@ class UserModifier {
 
   private final UserRepository userRepository;
 
-  User replace(UserDTO userDTO) {
+  User modify(Long id, UserDTO userDTO) {
     User user =
         userRepository
-            .findById(userDTO.getId())
+            .findById(id)
             .orElseThrow(
                 () ->
                     UserNotFoundException.causedBy(
-                        String.format("User not found for id: \'%s\'", userDTO.getId())));
+                        String.format("User not found for id: \'%s\'", id)));
 
-    user.replace(userDTO);
+    user.update(userDTO);
 
     try {
       return userRepository.save(user);

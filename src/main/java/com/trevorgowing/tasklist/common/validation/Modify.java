@@ -1,3 +1,3 @@
 package com.trevorgowing.tasklist.common.validation;
 
-public interface Replace {}
+public interface Modify {}

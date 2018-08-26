@@ -55,8 +55,8 @@ public class UserControllerGetTests extends AbstractControllerTests {
 
   @Test
   public void testGetWithExistingUsers_shouldDelegateToUserFinderAndRespondWithStatusOk() {
-    UserDTO userOneDTO = UserDTO.builder().build();
-    UserDTO userTwoDTO = UserDTO.builder().build();
+    UserDTO userOneDTO = UserDTO.builder().id(1L).username("one").build();
+    UserDTO userTwoDTO = UserDTO.builder().id(2L).username("two").build();
 
     Collection<UserDTO> users = Arrays.asList(userOneDTO, userTwoDTO);
 
@@ -104,7 +104,7 @@ public class UserControllerGetTests extends AbstractControllerTests {
   public void
       testGetByIdWithMatchingUser_shouldDelegateToUserFinderAndResponseWithStatusOkAndUser() {
     Long id = 1L;
-    UserDTO expected = UserDTO.builder().id(id).username("username").build();
+    UserDTO expected = UserDTO.builder().id(1L).username("one").build();
 
     when(userFinder.findDTOById(id)).thenReturn(expected);
 

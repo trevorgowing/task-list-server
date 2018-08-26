@@ -22,10 +22,10 @@ public class UserFinderTests extends AbstractTests {
 
   @Test
   public void testFindDTOs_shouldDelegateToUserRepositoryAndCollectDTOs() {
-    User userOne = User.builder().build();
-    UserDTO userOneDTO = UserDTO.builder().build();
-    User userTwo = User.builder().build();
-    UserDTO userTwoDTO = UserDTO.builder().build();
+    User userOne = User.builder().id(1L).username("one").build();
+    UserDTO userOneDTO = UserDTO.builder().id(1L).username("one").build();
+    User userTwo = User.builder().id(2L).username("two").build();
+    UserDTO userTwoDTO = UserDTO.builder().id(2L).username("two").build();
 
     when(userRepository.findAll()).thenReturn(Arrays.asList(userOne, userTwo));
 
@@ -47,8 +47,8 @@ public class UserFinderTests extends AbstractTests {
   public void testFindDTOByIdWithExistingUser_shouldDelegateToUserRepositoryAndReturnDTO() {
     Long id = 1L;
 
-    User user = User.builder().id(id).build();
-    UserDTO expected = UserDTO.builder().id(id).build();
+    User user = User.builder().id(id).username("one").build();
+    UserDTO expected = UserDTO.builder().id(id).username("one").build();
 
     when(userRepository.findById(id)).thenReturn(Optional.of(user));
 

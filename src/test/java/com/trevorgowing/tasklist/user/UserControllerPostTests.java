@@ -34,29 +34,6 @@ public class UserControllerPostTests extends AbstractControllerTests {
   }
 
   @Test
-  public void testPostWithNonNullId_shouldRespondWithStatusBadRequest() {
-    UserDTO userDTO = UserDTO.builder().id(1L).username("test").build();
-
-    ExceptionResponse badRequestResponse =
-        ExceptionResponse.builder()
-            .status(BAD_REQUEST)
-            .message("\'id\' must be null, use PUT to replace")
-            .build();
-
-    given()
-        .accept(JSON)
-        .contentType(JSON)
-        .body(JsonEncoder.encodeToString(userDTO))
-        .post("/api/user")
-        .then()
-        .log()
-        .ifValidationFails()
-        .contentType(JSON)
-        .statusCode(BAD_REQUEST.value())
-        .body(is(equalTo(JsonEncoder.encodeToString(badRequestResponse))));
-  }
-
-  @Test
   public void testPostWithNullUsername_shouldRespondWithStatusBadRequest() {
     UserDTO userDTO = UserDTO.builder().username(null).build();
 
@@ -170,7 +147,7 @@ public class UserControllerPostTests extends AbstractControllerTests {
 
   @Test
   public void testPostWithValidUser_shouldRespondWithStatusCreatedAndCreatedUser() {
-    UserDTO requestUserDTO =
+    UserDTO userDTO =
         UserDTO.builder().username("test").firstName("fred").lastName("george").build();
 
     User user = User.builder().id(1L).username("test").firstName("fred").lastName("george").build();
@@ -178,12 +155,12 @@ public class UserControllerPostTests extends AbstractControllerTests {
     UserDTO expected =
         UserDTO.builder().id(1L).username("test").firstName("fred").lastName("george").build();
 
-    when(userCreator.create(requestUserDTO)).thenReturn(user);
+    when(userCreator.create(userDTO)).thenReturn(user);
 
     given()
         .accept(JSON)
         .contentType(JSON)
-        .body(JsonEncoder.encodeToString(requestUserDTO))
+        .body(JsonEncoder.encodeToString(userDTO))
         .post("/api/user")
         .then()
         .log()
@@ -192,7 +169,7 @@ public class UserControllerPostTests extends AbstractControllerTests {
         .statusCode(CREATED.value())
         .body(is(equalTo(JsonEncoder.encodeToString(expected))));
 
-    UserDTO actual = userController.post(requestUserDTO);
+    UserDTO actual = userController.post(userDTO);
 
     assertThat(actual, is(equalTo(expected)));
   }

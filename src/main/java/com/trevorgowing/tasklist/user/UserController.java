@@ -8,12 +8,10 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
-import com.trevorgowing.tasklist.common.exception.BadRequestException;
 import com.trevorgowing.tasklist.common.exception.ExceptionResponse;
 import com.trevorgowing.tasklist.common.validation.Create;
-import com.trevorgowing.tasklist.common.validation.Replace;
+import com.trevorgowing.tasklist.common.validation.Modify;
 import java.util.Collection;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -66,16 +64,8 @@ class UserController {
     consumes = APPLICATION_JSON_UTF8_VALUE,
     produces = APPLICATION_JSON_UTF8_VALUE
   )
-  UserDTO put(@PathVariable Long id, @RequestBody @Validated(Replace.class) UserDTO userDTO) {
-    validateId(id, userDTO);
-    return UserDTO.from(userModifier.replace(userDTO));
-  }
-
-  private void validateId(Long id, UserDTO userDTO) {
-    if (!Objects.equals(id, userDTO.getId())) {
-      throw BadRequestException.causedBy(
-          "Path variable User#id is not equal to request body User#id");
-    }
+  UserDTO put(@PathVariable Long id, @RequestBody @Validated(Modify.class) UserDTO userDTO) {
+    return UserDTO.from(userModifier.modify(id, userDTO));
   }
 
   @ResponseStatus(NO_CONTENT)

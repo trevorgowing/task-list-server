@@ -10,7 +10,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
-import com.trevorgowing.tasklist.common.exception.BadRequestException;
 import com.trevorgowing.tasklist.common.exception.ExceptionResponse;
 import com.trevorgowing.tasklist.test.encoder.JsonEncoder;
 import com.trevorgowing.tasklist.test.type.AbstractControllerTests;
@@ -36,51 +35,8 @@ public class UserControllerPutTests extends AbstractControllerTests {
   }
 
   @Test
-  public void testPutWithNullId_shouldRespondWithStatusBadRequest() {
-    UserDTO userDTO = UserDTO.builder().id(null).username("test").build();
-
-    ExceptionResponse badRequestResponse =
-        ExceptionResponse.builder()
-            .status(BAD_REQUEST)
-            .message("\'id\' may not be null, use POST to create")
-            .build();
-
-    given()
-        .accept(JSON)
-        .contentType(JSON)
-        .body(JsonEncoder.encodeToString(userDTO))
-        .put("/api/user/1")
-        .then()
-        .log()
-        .ifValidationFails()
-        .contentType(JSON)
-        .statusCode(BAD_REQUEST.value())
-        .body(is(equalTo(JsonEncoder.encodeToString(badRequestResponse))));
-  }
-
-  @Test
-  public void testPutWithNullUsername_shouldRespondWithStatusBadRequest() {
-    UserDTO userDTO = UserDTO.builder().id(1L).username(null).build();
-
-    ExceptionResponse badRequestResponse =
-        ExceptionResponse.builder().status(BAD_REQUEST).message("\'username\' is required").build();
-
-    given()
-        .accept(JSON)
-        .contentType(JSON)
-        .body(JsonEncoder.encodeToString(userDTO))
-        .put("/api/user/1")
-        .then()
-        .log()
-        .ifValidationFails()
-        .contentType(JSON)
-        .statusCode(BAD_REQUEST.value())
-        .body(is(equalTo(JsonEncoder.encodeToString(badRequestResponse))));
-  }
-
-  @Test
   public void testPutWithUsernameTooShort_shouldRespondWithStatusBadRequest() {
-    UserDTO userDTO = UserDTO.builder().id(1L).username("u").build();
+    UserDTO userDTO = UserDTO.builder().username("u").build();
 
     ExceptionResponse badRequestResponse =
         ExceptionResponse.builder()
@@ -103,7 +59,7 @@ public class UserControllerPutTests extends AbstractControllerTests {
 
   @Test
   public void testPutWithUsernameTooLong_shouldRespondWithStatusBadRequest() {
-    UserDTO userDTO = UserDTO.builder().id(1L).username("test").username(TOO_LONG).build();
+    UserDTO userDTO = UserDTO.builder().username("test").username(TOO_LONG).build();
 
     ExceptionResponse badRequestResponse =
         ExceptionResponse.builder()
@@ -126,7 +82,7 @@ public class UserControllerPutTests extends AbstractControllerTests {
 
   @Test
   public void testPutWithFirstNameTooLong_shouldRespondWithStatusBadRequest() {
-    UserDTO userDTO = UserDTO.builder().id(1L).username("test").firstName(TOO_LONG).build();
+    UserDTO userDTO = UserDTO.builder().username("test").firstName(TOO_LONG).build();
 
     ExceptionResponse badRequestResponse =
         ExceptionResponse.builder()
@@ -149,7 +105,7 @@ public class UserControllerPutTests extends AbstractControllerTests {
 
   @Test
   public void testPutWithLastNameTooLong_shouldRespondWithStatusBadRequest() {
-    UserDTO userDTO = UserDTO.builder().id(1L).username("test").lastName(TOO_LONG).build();
+    UserDTO userDTO = UserDTO.builder().username("test").lastName(TOO_LONG).build();
 
     ExceptionResponse badRequestResponse =
         ExceptionResponse.builder()
@@ -170,42 +126,17 @@ public class UserControllerPutTests extends AbstractControllerTests {
         .body(is(equalTo(JsonEncoder.encodeToString(badRequestResponse))));
   }
 
-  @Test(expected = BadRequestException.class)
-  public void testPutWithMismatchedIds_shouldResponseWithStatusBadRequestAndExceptionResponse() {
-    UserDTO userDTO = UserDTO.builder().id(2L).username("test").build();
-
-    ExceptionResponse badRequestResponse =
-        ExceptionResponse.builder()
-            .status(BAD_REQUEST)
-            .message("Path variable User#id is not equal to request body User#id")
-            .build();
-
-    given()
-        .accept(JSON)
-        .contentType(JSON)
-        .body(JsonEncoder.encodeToString(userDTO))
-        .put("/api/user/1")
-        .then()
-        .log()
-        .ifValidationFails()
-        .contentType(JSON)
-        .statusCode(BAD_REQUEST.value())
-        .body(is(equalTo(JsonEncoder.encodeToString(badRequestResponse))));
-
-    userController.put(1L, userDTO);
-  }
-
   @Test(expected = UserNotFoundException.class)
   public void testPutWithNoMatchingUser_shouldRespondWithStatusNotFoundAndExceptionResponse() {
     UserDTO requestUserDTO =
-        UserDTO.builder().id(1L).username("test").firstName("fred").lastName("george").build();
+        UserDTO.builder().username("test").firstName("fred").lastName("george").build();
 
     String message = "User not found for id: \'%s\'";
 
     ExceptionResponse notFoundResponse =
         ExceptionResponse.builder().status(NOT_FOUND).message(message).build();
 
-    when(userModifier.replace(requestUserDTO))
+    when(userModifier.modify(1L, requestUserDTO))
         .thenThrow(UserNotFoundException.builder().message(message).build());
 
     given()
@@ -226,14 +157,14 @@ public class UserControllerPutTests extends AbstractControllerTests {
   @Test
   public void testPutWithValidUser_shouldRespondWithStatusOkAndReplacedUser() {
     UserDTO requestUserDTO =
-        UserDTO.builder().id(1L).username("test").firstName("fred").lastName("george").build();
+        UserDTO.builder().username("test").firstName("fred").lastName("george").build();
 
     User user = User.builder().id(1L).username("test").firstName("fred").lastName("george").build();
 
     UserDTO expected =
         UserDTO.builder().id(1L).username("test").firstName("fred").lastName("george").build();
 
-    when(userModifier.replace(requestUserDTO)).thenReturn(user);
+    when(userModifier.modify(1L, requestUserDTO)).thenReturn(user);
 
     given()
         .accept(JSON)

@@ -39,6 +39,7 @@ class User extends AbstractAuditable<User, Long> implements Serializable {
   private String lastName;
 
   @Builder
+  @SuppressWarnings("unused")
   private User(Long id, String username, String firstName, String lastName) {
     setId(id);
     this.username = username;
@@ -46,15 +47,26 @@ class User extends AbstractAuditable<User, Long> implements Serializable {
     this.lastName = lastName;
   }
 
-  static User from(UserDTO userDTO) {
-    return new User(
-        userDTO.getId(), userDTO.getUsername(), userDTO.getFirstName(), userDTO.getLastName());
-  }
-
-  void replace(UserDTO userDTO) {
+  private User(UserDTO userDTO) {
     this.username = userDTO.getUsername();
     this.firstName = userDTO.getFirstName();
     this.lastName = userDTO.getLastName();
+  }
+
+  static User from(UserDTO userDTO) {
+    return new User(userDTO);
+  }
+
+  void update(UserDTO userDTO) {
+    if (userDTO.getUsername() != null) {
+      this.username = userDTO.getUsername();
+    }
+    if (userDTO.getFirstName() != null) {
+      this.firstName = userDTO.getFirstName();
+    }
+    if (userDTO.getLastName() != null) {
+      this.lastName = userDTO.getLastName();
+    }
   }
 
   @Override
