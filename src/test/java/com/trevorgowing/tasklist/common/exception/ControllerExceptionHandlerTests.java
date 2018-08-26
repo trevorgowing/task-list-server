@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
@@ -14,6 +15,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 import com.trevorgowing.tasklist.test.type.AbstractTests;
 import java.util.Collections;
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,6 +49,24 @@ public class ControllerExceptionHandlerTests extends AbstractTests {
         exceptionHandler.handleBadRequestException(exception);
 
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void
+      testHandleAccessDeniedException_shouldReturnResponseEntityContainingExceptionResponse() {
+    String message = "Access denied";
+
+    ResponseEntity expected =
+        ResponseEntity.status(FORBIDDEN)
+            .contentType(APPLICATION_JSON_UTF8)
+            .body(ExceptionResponse.builder().status(FORBIDDEN).message(message).build());
+
+    AccessDeniedException accessDeniedException =
+        AccessDeniedException.builder().message(message).build();
+
+    ResponseEntity actual = exceptionHandler.handleAccessDeniedException(accessDeniedException);
+
+    MatcherAssert.assertThat(actual, is(equalTo(expected)));
   }
 
   @Test

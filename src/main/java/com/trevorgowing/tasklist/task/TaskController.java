@@ -1,4 +1,4 @@
-package com.trevorgowing.tasklist.user;
+package com.trevorgowing.tasklist.task;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -11,6 +11,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import com.trevorgowing.tasklist.common.exception.ExceptionResponse;
 import com.trevorgowing.tasklist.common.validation.Create;
 import com.trevorgowing.tasklist.common.validation.Modify;
+import com.trevorgowing.tasklist.user.UserNotFoundException;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,69 +31,71 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/api/user")
-class UserController {
+@RequestMapping("/api/user/{userId}/task")
+class TaskController {
 
-  private final UserFinder userFinder;
-  private final UserCreator userCreator;
-  private final UserModifier userModifier;
-  private final UserDeleter userDeleter;
+  private final TaskFinder taskFinder;
+  private final TaskCreator taskCreator;
+  private final TaskModifier taskModifier;
+  private final TaskDeleter taskDeleter;
 
   @ResponseStatus(OK)
   @SuppressWarnings("unused")
   @GetMapping(produces = APPLICATION_JSON_UTF8_VALUE)
-  Collection<UserDTO> get() {
-    return userFinder.findDTOs();
+  Collection<TaskDTO> get(@PathVariable Long userId) {
+    return taskFinder.findDTOsByUserId(userId);
   }
 
   @ResponseStatus(OK)
   @SuppressWarnings("unused")
-  @GetMapping(path = "/{id}", produces = APPLICATION_JSON_UTF8_VALUE)
-  UserDTO get(@PathVariable Long id) {
-    return userFinder.findDTOById(id);
+  @GetMapping(path = "/{taskId}", produces = APPLICATION_JSON_UTF8_VALUE)
+  TaskDTO get(@PathVariable Long userId, @PathVariable Long taskId) {
+    return taskFinder.findDTOByUserIdAndTaskId(userId, taskId);
   }
 
   @ResponseStatus(CREATED)
   @SuppressWarnings("unused")
   @PostMapping(consumes = APPLICATION_JSON_UTF8_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
-  UserDTO post(@RequestBody @Validated(Create.class) UserDTO userDTO) {
-    return UserDTO.from(userCreator.create(userDTO));
+  TaskDTO post(@PathVariable Long userId, @RequestBody @Validated(Create.class) TaskDTO taskDTO) {
+    return TaskDTO.from(taskCreator.create(userId, taskDTO));
   }
 
   @ResponseStatus(OK)
   @SuppressWarnings("unused")
   @PutMapping(
-    path = "/{id}",
+    path = "/{taskId}",
     consumes = APPLICATION_JSON_UTF8_VALUE,
     produces = APPLICATION_JSON_UTF8_VALUE
   )
-  UserDTO put(@PathVariable Long id, @RequestBody @Validated(Modify.class) UserDTO userDTO) {
-    return UserDTO.from(userModifier.modify(id, userDTO));
+  TaskDTO put(
+      @PathVariable Long userId,
+      @PathVariable Long taskId,
+      @Validated(Modify.class) @RequestBody TaskDTO taskDTO) {
+    return TaskDTO.from(taskModifier.modify(userId, taskId, taskDTO));
   }
 
   @ResponseStatus(NO_CONTENT)
   @SuppressWarnings("unused")
-  @DeleteMapping(path = "/{id}")
-  void delete(@PathVariable Long id) {
-    userDeleter.deleteById(id);
+  @DeleteMapping(path = "/{taskId}")
+  void delete(@PathVariable Long userId, @PathVariable Long taskId) {
+    taskDeleter.deleteByUserIdAndTaskId(userId, taskId);
+  }
+
+  @SuppressWarnings("unused")
+  @ExceptionHandler(TaskNotFoundException.class)
+  ResponseEntity<ExceptionResponse> handleTaskNotFoundException(TaskNotFoundException tnfe) {
+    log.debug(tnfe.getMessage(), tnfe);
+    return ResponseEntity.status(NOT_FOUND)
+        .contentType(APPLICATION_JSON_UTF8)
+        .body(ExceptionResponse.from(NOT_FOUND, tnfe.getMessage()));
   }
 
   @SuppressWarnings("unused")
   @ExceptionHandler(UserNotFoundException.class)
   ResponseEntity<ExceptionResponse> handleUserNotFoundException(UserNotFoundException unfe) {
     log.debug(unfe.getMessage(), unfe);
-    return ResponseEntity.status(NOT_FOUND)
-        .contentType(APPLICATION_JSON_UTF8)
-        .body(ExceptionResponse.from(NOT_FOUND, unfe.getMessage()));
-  }
-
-  @SuppressWarnings("unused")
-  @ExceptionHandler(DuplicateUsernameException.class)
-  ResponseEntity<ExceptionResponse> handleDuplicateUsernameException(
-      DuplicateUsernameException due) {
-    log.debug(due.getMessage(), due);
     return ResponseEntity.status(CONFLICT)
         .contentType(APPLICATION_JSON_UTF8)
-        .body(ExceptionResponse.from(CONFLICT, due.getMessage()));
+        .body(ExceptionResponse.from(CONFLICT, unfe.getMessage()));
   }
 }

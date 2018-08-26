@@ -1,6 +1,7 @@
 package com.trevorgowing.tasklist.common.exception;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
@@ -21,16 +22,23 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(BadRequestException.class)
-  public ResponseEntity<ExceptionResponse> handleBadRequestException(BadRequestException bre) {
+  ResponseEntity<ExceptionResponse> handleBadRequestException(BadRequestException bre) {
     log.debug(bre.getMessage(), bre);
-
     return ResponseEntity.status(BAD_REQUEST)
         .contentType(APPLICATION_JSON_UTF8)
         .body(ExceptionResponse.from(BAD_REQUEST, bre.getMessage()));
   }
 
+  @ExceptionHandler(AccessDeniedException.class)
+  ResponseEntity<ExceptionResponse> handleAccessDeniedException(AccessDeniedException ade) {
+    log.debug(ade.getMessage(), ade);
+    return ResponseEntity.status(FORBIDDEN)
+        .contentType(APPLICATION_JSON_UTF8)
+        .body(ExceptionResponse.from(FORBIDDEN, ade.getMessage()));
+  }
+
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ExceptionResponse> handleUnhandledException(Exception exception) {
+  ResponseEntity<ExceptionResponse> handleUnhandledException(Exception exception) {
     log.error(exception.getMessage(), exception);
     return ResponseEntity.status(INTERNAL_SERVER_ERROR)
         .contentType(APPLICATION_JSON_UTF8)

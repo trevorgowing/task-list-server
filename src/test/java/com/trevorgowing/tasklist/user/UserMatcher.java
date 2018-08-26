@@ -6,11 +6,11 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 @RequiredArgsConstructor
-class UserMatcher extends TypeSafeMatcher<User> {
+public class UserMatcher extends TypeSafeMatcher<User> {
 
   private final User expected;
 
-  static UserMatcher hasSameStateAsUser(User expected) {
+  public static UserMatcher hasSameStateAsUser(User expected) {
     return new UserMatcher(expected);
   }
 
@@ -32,7 +32,7 @@ class UserMatcher extends TypeSafeMatcher<User> {
     printUser(expected, description);
   }
 
-  private static void printUser(User user, Description description) {
+  public static void printUser(User user, Description description) {
     description
         .appendText("User { id: ")
         .appendValue(user.getId())

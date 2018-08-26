@@ -9,6 +9,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 import com.trevorgowing.tasklist.common.exception.ExceptionResponse;
 import com.trevorgowing.tasklist.test.type.AbstractTests;
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class UserControllerExceptionHandlerTests extends AbstractTests {
 
     ResponseEntity actual = userController.handleUserNotFoundException(userNotFoundException);
 
-    assertThat(actual, is(equalTo(expected)));
+    MatcherAssert.assertThat(actual, is(equalTo(expected)));
   }
 
   @Test

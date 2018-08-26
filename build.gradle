@@ -87,6 +87,7 @@ dependencies {
 
   testCompile "io.rest-assured:rest-assured:3.1.1"
   testCompile "io.rest-assured:spring-mock-mvc:3.1.1"
+  testCompile "com.spotify:hamcrest-optional:1.1.1"
   testCompile "org.springframework.boot:spring-boot-starter-test"
 
   testRuntime "com.h2database:h2:1.4.197"

@@ -1,9 +1,15 @@
 package com.trevorgowing.tasklist.user;
 
+import static javax.persistence.CascadeType.ALL;
+
+import com.trevorgowing.tasklist.task.Task;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -20,7 +26,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
   name = "users",
   uniqueConstraints = {@UniqueConstraint(name = "username_uidx", columnNames = "username")}
 )
-class User extends AbstractAuditable<User, Long> implements Serializable {
+public class User extends AbstractAuditable<User, Long> implements Serializable {
 
   private static final long serialVersionUID = 891397974680533600L;
 
@@ -31,12 +37,15 @@ class User extends AbstractAuditable<User, Long> implements Serializable {
   private String username;
 
   @Size(max = 255)
-  @Column(name = "firstName")
+  @Column(name = "first_name")
   private String firstName;
 
   @Size(max = 255)
-  @Column(name = "lastName")
+  @Column(name = "last_name")
   private String lastName;
+
+  @OneToMany(mappedBy = "user", cascade = ALL, orphanRemoval = true)
+  private Set<Task> tasks = new HashSet<>();
 
   @Builder
   @SuppressWarnings("unused")
