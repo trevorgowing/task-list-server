@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -18,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.AbstractAuditable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Entity
@@ -26,6 +28,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
   name = "users",
   uniqueConstraints = {@UniqueConstraint(name = "username_uidx", columnNames = "username")}
 )
+@EntityListeners(AuditingEntityListener.class)
 public class User extends AbstractAuditable<User, Long> implements Serializable {
 
   private static final long serialVersionUID = 891397974680533600L;

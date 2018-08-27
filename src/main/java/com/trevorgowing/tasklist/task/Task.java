@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
@@ -19,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.AbstractAuditable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Entity
@@ -27,6 +29,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
   name = "tasks",
   indexes = {@Index(name = "user_id_idx", columnList = "user_id")}
 )
+@EntityListeners(AuditingEntityListener.class)
 public class Task extends AbstractAuditable<User, Long> implements Serializable {
 
   private static final long serialVersionUID = 6863062100794258783L;
