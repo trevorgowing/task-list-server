@@ -1,0 +1,34 @@
+---
+version: "3"
+
+services:
+  postgres:
+    image: postgres:10.5-alpine 
+    ports:
+      - "5432:5432"
+    networks:
+      - task-list
+    volumes:
+      - task-list-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "tasks"
+      POSTGRES_PASSWORD: "tasks"
+      POSTGRES_DB: "tasks"
+
+  task-list-server:
+    build: .
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    networks:
+      - task-list
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/tasks"
+
+networks:
+  task-list:
+
+volumes:
+  task-list-data:
