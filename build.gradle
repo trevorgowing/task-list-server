@@ -27,7 +27,7 @@ spotless {
 }
 
 flyway {
-  baselineVersion = "2018.08.24.07.15.33.897"
+  baselineVersion = "2018.08.26.21.28.48.525"
   outOfOrder = true
 }
 
